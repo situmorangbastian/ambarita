@@ -1,8 +1,6 @@
 package models
 
 import (
-	"strings"
-
 	"github.com/go-playground/validator/v10"
 )
 
@@ -15,13 +13,8 @@ type CustomValidator struct {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	err := cv.Validator.Struct(i)
 	if err != nil {
-		errorValidators, ok := err.(validator.ValidationErrors)
-		if ok {
-			errMessages := []string{}
-			for _, errValidator := range errorValidators {
-				errMessages = append(errMessages, errValidator.Field()+" "+errValidator.ActualTag())
-			}
-			err = NewErrorValidation(strings.Join(errMessages, ", "))
+		for _, errValidator := range err.(validator.ValidationErrors) {
+			return NewErrorValidation(errValidator.Field() + " " + errValidator.ActualTag())
 		}
 	}
 
