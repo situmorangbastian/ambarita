@@ -3,8 +3,10 @@ package http
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/timeout"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -14,16 +16,16 @@ type handler struct {
 }
 
 // NewHandler will initialize the articles/ resources endpoint
-func NewHandler(f *fiber.App, usecase models.ArticleUsecase) {
+func NewHandler(f *fiber.App, usecase models.ArticleUsecase, requestTimeout time.Duration) {
 	handler := &handler{
 		usecase: usecase,
 	}
 
-	f.Get("/articles", handler.fetch)
-	f.Post("/articles", handler.store)
-	f.Put("/articles/:id", handler.update)
-	f.Get("/articles/:id", handler.get)
-	f.Delete("/articles/:id", handler.delete)
+	f.Get("/articles", timeout.New(handler.fetch, requestTimeout*time.Second))
+	f.Post("/articles", timeout.New(handler.store, requestTimeout*time.Second))
+	f.Put("/articles/:id", timeout.New(handler.update, requestTimeout*time.Second))
+	f.Get("/articles/:id", timeout.New(handler.get, requestTimeout*time.Second))
+	f.Delete("/articles/:id", timeout.New(handler.delete, requestTimeout*time.Second))
 }
 
 func (h handler) fetch(c *fiber.Ctx) error {
