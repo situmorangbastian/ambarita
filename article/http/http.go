@@ -3,10 +3,8 @@ package http
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/timeout"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -16,16 +14,16 @@ type handler struct {
 }
 
 // NewHandler will initialize the articles/ resources endpoint
-func NewHandler(f *fiber.App, usecase models.ArticleUsecase, requestTimeout time.Duration) {
+func NewHandler(f *fiber.App, usecase models.ArticleUsecase) {
 	handler := &handler{
 		usecase: usecase,
 	}
 
-	f.Get("/articles", timeout.New(handler.fetch, requestTimeout*time.Second))
-	f.Post("/articles", timeout.New(handler.store, requestTimeout*time.Second))
-	f.Put("/articles/:id", timeout.New(handler.update, requestTimeout*time.Second))
-	f.Get("/articles/:id", timeout.New(handler.get, requestTimeout*time.Second))
-	f.Delete("/articles/:id", timeout.New(handler.delete, requestTimeout*time.Second))
+	f.Get("/articles", handler.fetch)
+	f.Post("/articles", handler.store)
+	f.Put("/articles/:id", handler.update)
+	f.Get("/articles/:id", handler.get)
+	f.Delete("/articles/:id", handler.delete)
 }
 
 func (h handler) fetch(c *fiber.Ctx) error {
@@ -42,7 +40,7 @@ func (h handler) fetch(c *fiber.Ctx) error {
 
 	articles, nextCursor, err := h.usecase.Fetch(c.Context(), c.Query("cursor"), num)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -57,7 +55,7 @@ func (h handler) fetch(c *fiber.Ctx) error {
 func (h handler) get(c *fiber.Ctx) error {
 	article, err := h.usecase.Get(c.Context(), c.Params("id"))
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -74,12 +72,12 @@ func (h handler) store(c *fiber.Ctx) error {
 	}
 
 	if err := article.Validate(); err != nil {
-		return err
+		panic(err)
 	}
 
 	storedArticle, err := h.usecase.Store(c.Context(), article)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	response := models.DefaultCreatedResponse()
@@ -98,12 +96,12 @@ func (h handler) update(c *fiber.Ctx) error {
 	article.ID = c.Params("id")
 
 	if err := article.Validate(); err != nil {
-		return err
+		panic(err)
 	}
 
 	updatedArticle, err := h.usecase.Update(c.Context(), article)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -115,7 +113,7 @@ func (h handler) update(c *fiber.Ctx) error {
 func (h handler) delete(c *fiber.Ctx) error {
 	err := h.usecase.Delete(c.Context(), c.Params("id"))
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	return c.Status(http.StatusNoContent).Next()

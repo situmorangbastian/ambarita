@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
@@ -17,6 +17,7 @@ import (
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository/mysql"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
+	mw "github.com/situmorangbastian/ambarita/middleware"
 )
 
 func init() {
@@ -75,12 +76,15 @@ func main() {
 	_ = m.Up()
 
 	// Server
-	f := fiber.New()
+	f := fiber.New(fiber.Config{
+		ErrorHandler: mw.ErrMiddleware,
+	})
+	f.Use(recover.New())
 
 	// Domain
 	ar := articleRepository.NewMysqlRepository(dbConn)
 	au := articleUsecase.NewArticleUsecase(ar)
-	articleHandler.NewHandler(f, au, time.Duration(viper.GetInt("context.timeout")))
+	articleHandler.NewHandler(f, au)
 
 	// Start server
 	log.Fatal(f.Listen(viper.GetString("server.address")))
