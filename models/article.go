@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 // Article ...
@@ -14,6 +16,14 @@ type Article struct {
 	CreateTime  time.Time `json:"created_time"`
 	UpdateTime  time.Time `json:"updated_time"`
 	DeletedTime time.Time `json:"-"`
+}
+
+func (a Article) Validate() error {
+	cv := CustomValidator{
+		Validator: validator.New(),
+	}
+
+	return cv.Validate(a)
 }
 
 // ArticleUsecase represent the article's usecases contract
