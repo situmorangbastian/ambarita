@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -79,7 +80,7 @@ func main() {
 	// Domain
 	ar := articleRepository.NewMysqlRepository(dbConn)
 	au := articleUsecase.NewArticleUsecase(ar)
-	articleHandler.NewHandler(f, au)
+	articleHandler.NewHandler(f, au, time.Duration(viper.GetInt("context.timeout")))
 
 	// Start server
 	log.Fatal(f.Listen(viper.GetString("server.address")))
