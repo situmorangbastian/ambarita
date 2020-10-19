@@ -1,3 +1,4 @@
 vendor
 !ambarita/
 engine
+configs/config.json
