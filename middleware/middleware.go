@@ -15,6 +15,13 @@ func ErrMiddleware(ctx *fiber.Ctx, err error) error {
 	errResponse := models.DefaultErrorResponse()
 	errResponse.Message = err.Error()
 
+	// Retreive the custom statuscode if it's an fiber.*Error
+	if e, ok := err.(*fiber.Error); ok {
+		errResponse.Message = e.Error()
+		errResponse.Status = e.Code
+		return ctx.Status(errResponse.Status).JSON(errResponse)
+	}
+
 	// Check error based on error type
 	switch err.(type) {
 	case models.ErrorValidation:

@@ -40,7 +40,7 @@ func (h handler) fetch(c *fiber.Ctx) error {
 
 	articles, nextCursor, err := h.usecase.Fetch(c.Context(), c.Query("cursor"), num)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -55,7 +55,7 @@ func (h handler) fetch(c *fiber.Ctx) error {
 func (h handler) get(c *fiber.Ctx) error {
 	article, err := h.usecase.Get(c.Context(), c.Params("id"))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -72,12 +72,12 @@ func (h handler) store(c *fiber.Ctx) error {
 	}
 
 	if err := article.Validate(); err != nil {
-		panic(err)
+		return err
 	}
 
 	storedArticle, err := h.usecase.Store(c.Context(), article)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	response := models.DefaultCreatedResponse()
@@ -96,12 +96,12 @@ func (h handler) update(c *fiber.Ctx) error {
 	article.ID = c.Params("id")
 
 	if err := article.Validate(); err != nil {
-		panic(err)
+		return err
 	}
 
 	updatedArticle, err := h.usecase.Update(c.Context(), article)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	response := models.DefaultSuccessResponse()
@@ -113,7 +113,7 @@ func (h handler) update(c *fiber.Ctx) error {
 func (h handler) delete(c *fiber.Ctx) error {
 	err := h.usecase.Delete(c.Context(), c.Params("id"))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return c.Status(http.StatusNoContent).Next()
