@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/situmorangbastian/ambarita/models"
@@ -15,22 +16,22 @@ func ErrMiddleware(ctx *fiber.Ctx, err error) error {
 	errResponse := models.DefaultErrorResponse()
 	errResponse.Message = err.Error()
 
-	// Retreive the custom statuscode if it's an fiber.*Error
-	if e, ok := err.(*fiber.Error); ok {
+	// Retreive the custom response if it's an fiber.*Error
+	if e, ok := errors.Cause(err).(*fiber.Error); ok {
 		errResponse.Message = e.Error()
 		errResponse.Status = e.Code
 		return ctx.Status(errResponse.Status).JSON(errResponse)
 	}
 
 	// Check error based on error type
-	switch err.(type) {
+	switch errors.Cause(err).(type) {
 	case models.ErrorValidation:
 		errResponse.Status = http.StatusBadRequest
 		errResponse.Data = map[string]interface{}{}
 		return ctx.Status(errResponse.Status).JSON(errResponse)
 	}
 
-	switch err {
+	switch errors.Cause(err) {
 	case models.ErrBadRequest:
 		errResponse.Status = http.StatusBadRequest
 	case models.ErrNotFound:
