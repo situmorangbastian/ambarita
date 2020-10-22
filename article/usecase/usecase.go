@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -26,7 +27,7 @@ func NewArticleUsecase(repository models.ArticleRepository) models.ArticleUsecas
 func (u usecase) Fetch(ctx context.Context, cursor string, num int) ([]models.Article, string, error) {
 	articles, nextCursor, err := u.repository.Fetch(ctx, cursor, num)
 	if err != nil {
-		return make([]models.Article, 0), "", err
+		return make([]models.Article, 0), "", errors.Wrap(err, "fetch article")
 	}
 
 	if len(articles) == 0 {
@@ -39,7 +40,7 @@ func (u usecase) Fetch(ctx context.Context, cursor string, num int) ([]models.Ar
 func (u usecase) Get(ctx context.Context, ID string) (models.Article, error) {
 	article, err := u.repository.Get(ctx, ID)
 	if err != nil {
-		return models.Article{}, err
+		return models.Article{}, errors.Wrap(err, "get article")
 	}
 
 	return article, nil
@@ -52,7 +53,7 @@ func (u usecase) Store(ctx context.Context, article models.Article) (models.Arti
 
 	slug, err := u.resolveSlug(ctx, buildSlug(article.Title))
 	if err != nil {
-		return models.Article{}, err
+		return models.Article{}, errors.Wrap(err, "resolve slug")
 	}
 	article.Slug = slug
 
@@ -67,7 +68,7 @@ func (u usecase) Store(ctx context.Context, article models.Article) (models.Arti
 func (u usecase) Update(ctx context.Context, article models.Article) (models.Article, error) {
 	currentArticle, err := u.Get(ctx, article.ID)
 	if err != nil {
-		return models.Article{}, err
+		return models.Article{}, errors.Wrap(err, "get article on update")
 	}
 
 	article.Slug = currentArticle.Slug
@@ -75,7 +76,7 @@ func (u usecase) Update(ctx context.Context, article models.Article) (models.Art
 
 	err = u.repository.Update(ctx, article)
 	if err != nil {
-		return models.Article{}, err
+		return models.Article{}, errors.Wrap(err, "update article")
 	}
 
 	article.CreateTime = currentArticle.CreateTime
@@ -83,8 +84,12 @@ func (u usecase) Update(ctx context.Context, article models.Article) (models.Art
 	return article, nil
 }
 
-func (u usecase) Delete(ctx context.Context, ID string) error {
-	return u.repository.Delete(ctx, ID)
+func (u usecase) Delete(ctx context.Context, id string) error {
+	err := u.repository.Delete(ctx, id)
+	if err != nil {
+		return errors.Wrap(err, "delete article")
+	}
+	return nil
 }
 
 func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
