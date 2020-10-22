@@ -116,5 +116,5 @@ func (h handler) delete(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(http.StatusNoContent).Next()
+	return c.SendStatus(http.StatusNoContent)
 }
