@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
-	articleRepository "github.com/situmorangbastian/ambarita/article/repository/mysql"
+	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
 	mw "github.com/situmorangbastian/ambarita/middleware"
 )

@@ -1,4 +1,4 @@
-package mysql
+package repository
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/situmorangbastian/ambarita/article/repository"
 	"github.com/situmorangbastian/ambarita/models"
 )
 
@@ -34,7 +33,7 @@ func (r mysqlRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 	}
 
 	if cursor != "" {
-		decodedCursor, err := repository.DecodeCursor(cursor)
+		decodedCursor, err := DecodeCursor(cursor)
 		if err != nil {
 			return make([]models.Article, 0), "", models.ErrBadRequest
 		}
@@ -72,7 +71,7 @@ func (r mysqlRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 
 	nextCursor := ""
 	if len(articles) > 0 {
-		nextCursor = repository.EncodeCursor(articles[len(articles)-1].CreateTime)
+		nextCursor = EncodeCursor(articles[len(articles)-1].CreateTime)
 	}
 
 	return articles, nextCursor, nil
