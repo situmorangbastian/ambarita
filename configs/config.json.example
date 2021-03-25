@@ -3,6 +3,9 @@
     "server": {
       "address": ":2004"
     },
+    "gofiber": {
+      "prefork": false
+    },
     "context":{
       "timeout": 5
     },
