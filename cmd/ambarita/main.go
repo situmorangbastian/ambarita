@@ -77,6 +77,7 @@ func main() {
 
 	// Server
 	f := fiber.New(fiber.Config{
+		Prefork:      true,
 		ErrorHandler: mw.ErrMiddleware,
 	})
 	f.Use(recover.New())
