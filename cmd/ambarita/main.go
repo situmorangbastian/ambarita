@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"os"
+	"os/signal"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -76,17 +78,29 @@ func main() {
 	_ = m.Up()
 
 	// Server
-	f := fiber.New(fiber.Config{
-		Prefork:      true,
+	app := fiber.New(fiber.Config{
+		Prefork:      viper.GetBool("gofiber.prefork"),
 		ErrorHandler: gower.ErrMiddleware,
 	})
-	f.Use(recover.New())
+	app.Use(recover.New())
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		log.Info("Gracefully shutting down...")
+		if err := app.Shutdown(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// Domain
 	ar := articleRepository.NewMysqlRepository(dbConn)
 	au := articleUsecase.NewArticleUsecase(ar)
-	articleHandler.NewHandler(f, au)
+	articleHandler.NewHandler(app, au)
 
 	// Start server
-	log.Fatal(f.Listen(viper.GetString("server.address")))
+	if err := app.Listen(viper.GetString("server.address")); err != nil {
+		log.Fatal(err)
+	}
 }
