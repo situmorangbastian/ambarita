@@ -12,12 +12,12 @@ import (
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	log "github.com/sirupsen/logrus"
+	"github.com/situmorangbastian/gower"
 	"github.com/spf13/viper"
 
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
-	mw "github.com/situmorangbastian/ambarita/middleware"
 )
 
 func init() {
@@ -78,7 +78,7 @@ func main() {
 	// Server
 	f := fiber.New(fiber.Config{
 		Prefork:      true,
-		ErrorHandler: mw.ErrMiddleware,
+		ErrorHandler: gower.ErrMiddleware,
 	})
 	f.Use(recover.New())
 

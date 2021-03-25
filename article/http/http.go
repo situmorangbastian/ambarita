@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	gowerModel "github.com/situmorangbastian/gower/models"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -34,7 +35,7 @@ func (h handler) fetch(c *fiber.Ctx) error {
 		var err error
 		num, err = strconv.Atoi(c.Query("num"))
 		if err != nil {
-			return models.ErrBadRequest
+			return gowerModel.ConstraintErrorf("invalid query param num")
 		}
 	}
 
@@ -68,7 +69,7 @@ func (h handler) store(c *fiber.Ctx) error {
 	article := models.Article{}
 	err := c.BodyParser(&article)
 	if err != nil {
-		return models.ErrBadRequest
+		return gowerModel.ConstraintErrorf(err.Error())
 	}
 
 	if err := article.Validate(); err != nil {
@@ -90,7 +91,7 @@ func (h handler) update(c *fiber.Ctx) error {
 	article := models.Article{}
 	err := c.BodyParser(&article)
 	if err != nil {
-		return models.ErrBadRequest
+		return gowerModel.ConstraintErrorf(err.Error())
 	}
 
 	article.ID = c.Params("id")
