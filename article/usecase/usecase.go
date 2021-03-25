@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	gowerModel "github.com/situmorangbastian/gower/models"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -95,10 +96,12 @@ func (u usecase) Delete(ctx context.Context, id string) error {
 func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 	_, err := u.repository.Get(ctx, slug)
 	if err != nil {
-		if err == models.ErrNotFound {
+		switch errors.Cause(err).(type) {
+		case gowerModel.NotFoundError:
 			return slug, nil
+		default:
+			return "", err
 		}
-		return "", err
 	}
 
 	counterSlug := int(1)
@@ -106,10 +109,12 @@ func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 		newSlug := slug + "-" + strconv.Itoa(counterSlug)
 		_, err = u.repository.Get(ctx, newSlug)
 		if err != nil {
-			if err == models.ErrNotFound {
+			switch errors.Cause(err).(type) {
+			case gowerModel.NotFoundError:
 				return newSlug, nil
+			default:
+				return "", err
 			}
-			return "", err
 		}
 
 		counterSlug++
