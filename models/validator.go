@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/go-playground/validator/v10"
-	gowerModel "github.com/situmorangbastian/gower/models"
+	"github.com/situmorangbastian/gower"
 )
 
 // CustomValidator is custom validation for request data
@@ -15,7 +15,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	err := cv.Validator.Struct(i)
 	if err != nil {
 		for _, errValidator := range err.(validator.ValidationErrors) {
-			return gowerModel.ConstraintErrorf((errValidator.Field() + " " + errValidator.ActualTag()))
+			return gower.ConstraintErrorf((errValidator.Field() + " " + errValidator.ActualTag()))
 		}
 	}
 

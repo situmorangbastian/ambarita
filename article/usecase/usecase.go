@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	gowerModel "github.com/situmorangbastian/gower/models"
 
 	"github.com/situmorangbastian/ambarita/models"
+	"github.com/situmorangbastian/gower"
 )
 
 type usecase struct {
@@ -97,7 +97,7 @@ func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 	_, err := u.repository.Get(ctx, slug)
 	if err != nil {
 		switch errors.Cause(err).(type) {
-		case gowerModel.NotFoundError:
+		case gower.NotFoundError:
 			return slug, nil
 		default:
 			return "", err
@@ -110,7 +110,7 @@ func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 		_, err = u.repository.Get(ctx, newSlug)
 		if err != nil {
 			switch errors.Cause(err).(type) {
-			case gowerModel.NotFoundError:
+			case gower.NotFoundError:
 				return newSlug, nil
 			default:
 				return "", err

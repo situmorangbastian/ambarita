@@ -7,7 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	log "github.com/sirupsen/logrus"
-	gowerModel "github.com/situmorangbastian/gower/models"
+	"github.com/situmorangbastian/gower"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -36,7 +36,7 @@ func (r mysqlRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 	if cursor != "" {
 		decodedCursor, err := DecodeCursor(cursor)
 		if err != nil {
-			return make([]models.Article, 0), "", gowerModel.ConstraintErrorf("invalid query param cursor")
+			return make([]models.Article, 0), "", gower.ConstraintErrorf("invalid query param cursor")
 		}
 		qBuilder = qBuilder.Where(sq.Lt{"created_time": decodedCursor})
 	}
@@ -107,7 +107,7 @@ func (r mysqlRepository) Get(ctx context.Context, ID string) (models.Article, er
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return models.Article{}, gowerModel.NotFoundErrorf("article not found")
+			return models.Article{}, gower.NotFoundErrorf("article not found")
 		}
 		return models.Article{}, err
 	}
@@ -151,7 +151,7 @@ func (r mysqlRepository) Update(ctx context.Context, article models.Article) err
 	affected, _ := res.RowsAffected()
 
 	if affected != 1 {
-		return gowerModel.NotFoundErrorf("article not found")
+		return gower.NotFoundErrorf("article not found")
 	}
 
 	return nil
@@ -175,7 +175,7 @@ func (r mysqlRepository) Delete(ctx context.Context, ID string) error {
 	affected, _ := res.RowsAffected()
 
 	if affected != 1 {
-		return gowerModel.NotFoundErrorf("article not found")
+		return gower.NotFoundErrorf("article not found")
 	}
 
 	return nil
