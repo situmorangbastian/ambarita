@@ -9,11 +9,11 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gofiber/fiber/v2 v2.9.0
+	github.com/gofiber/fiber/v2 v2.12.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/google/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/situmorangbastian/gower v1.0.0
+	github.com/situmorangbastian/gower v1.0.1
 	github.com/spf13/viper v1.7.1
 )
