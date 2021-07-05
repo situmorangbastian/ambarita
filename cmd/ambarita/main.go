@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
@@ -98,6 +99,9 @@ func main() {
 	ar := articleRepository.NewMysqlRepository(dbConn)
 	au := articleUsecase.NewArticleUsecase(ar)
 	articleHandler.NewHandler(app, au)
+
+	// monitor dashboard
+	app.Get("/dashboard", monitor.New())
 
 	// Start server
 	if err := app.Listen(viper.GetString("server.address")); err != nil {
