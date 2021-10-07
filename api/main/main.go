@@ -1,10 +1,11 @@
-package handler
+package api
 
 import (
 	"encoding/json"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/situmorangbastian/ambarita/models"
 )
 
@@ -42,9 +43,18 @@ var (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/api/articles", fetchAllArticles).Methods(http.MethodGet)
+
+	router.ServeHTTP(w, r)
+}
+
+func fetchAllArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	resp, _ := json.Marshal(Posts[0])
+	resp, _ := json.Marshal(Posts)
+
 	w.Write(resp)
 }
