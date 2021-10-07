@@ -28,7 +28,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	resp, _ := json.Marshal(articles)
 
-	if r.URL.Path == "/posts" {
+	if r.URL.Path == "/api/posts" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(resp)
