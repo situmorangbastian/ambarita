@@ -8,7 +8,6 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-
 	articles := []models.Article{
 		{
 			ID:    "ssg-ssr",
@@ -29,6 +28,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	resp, _ := json.Marshal(articles)
 
+	if r.URL.Path == "/posts" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte(`{"message": "not found"}`))
 }
