@@ -1,17 +1,10 @@
-package api
+package models
 
-import (
-	"encoding/json"
-	"net/http"
-	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/situmorangbastian/ambarita/models"
-)
+import "time"
 
 var (
 	timeNow = time.Now()
-	Posts   = []models.Article{
+	Posts   = []Article{
 		{
 			ID:    "ssg-ssr",
 			Title: "When to Use Static Generation v.s. Server-side Rendering",
@@ -26,7 +19,8 @@ var (
 			<p>You should ask yourself: "Can I pre-render this page <strong>ahead</strong> of a user's request?" If the answer is yes, then you should choose Static Generation.</p>
 			<p>On the other hand, Static Generation is <strong>not</strong> a good idea if you cannot pre-render a page ahead of a user's request. Maybe your page shows frequently updated data, and the page content changes on every request.</p>
 			<p>In that case, you can use <strong>Server-Side Rendering</strong>. It will be slower, but the pre-rendered page will always be up-to-date. Or you can skip pre-rendering and use client-side JavaScript to populate data.</p>`,
-			CreateTime: timeNow.Add(time.Duration(300)),
+			CreateTime: timeNow.Add(time.Duration(300 * time.Second)),
+			UpdateTime: timeNow.Add(time.Duration(300 * time.Second)),
 		},
 		{
 			ID:    "pre-rendering",
@@ -38,23 +32,7 @@ var (
 			</ul>
 			<p>Importantly, Next.js lets you <strong>choose</strong> which pre-rendering form to use for each page. You can create a "hybrid" Next.js app by using Static Generation for most pages and using Server-side Rendering for others.</p>`,
 			CreateTime: timeNow,
+			UpdateTime: timeNow,
 		},
 	}
 )
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/articles", fetchAllArticles).Methods(http.MethodGet)
-
-	router.ServeHTTP(w, r)
-}
-
-func fetchAllArticles(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	resp, _ := json.Marshal(Posts)
-
-	w.Write(resp)
-}
