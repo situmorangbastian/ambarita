@@ -28,6 +28,19 @@ func NewHandler(e *echo.Echo, usecase models.ArticleUsecase) {
 	e.DELETE("/articles/:id", handler.delete)
 }
 
+// NewHandler will initialize the articles/ resources endpoint
+func NewGroupHandler(e *echo.Group, usecase models.ArticleUsecase) {
+	handler := &handler{
+		usecase: usecase,
+	}
+
+	e.GET("/articles", handler.fetch)
+	e.POST("/articles", handler.store)
+	e.PUT("/articles/:id", handler.update)
+	e.GET("/articles/:id", handler.get)
+	e.DELETE("/articles/:id", handler.delete)
+}
+
 func (h handler) fetch(c echo.Context) error {
 	num := 0
 	numStr := c.QueryParam("num")

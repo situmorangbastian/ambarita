@@ -38,10 +38,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	e := echo.New()
 	e.Use(eclipse.Error())
+	g := e.Group("/api")
 
 	// Domain
 	au := articleUsecase.NewArticleUsecase(ar)
-	articleHandler.NewHandler(e, au)
+	articleHandler.NewGroupHandler(g, au)
 
 	e.ServeHTTP(w, r)
 }
