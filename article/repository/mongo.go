@@ -41,6 +41,22 @@ func (r mongoRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 		})
 
 	mongoFilter := bson.D{}
+
+	if cursor != "" {
+		nameFilter := bson.M{}
+		name, err := DecodeCursor(cursor)
+		if err != nil {
+			return []models.Article{}, "", err
+		}
+		nameFilter["$gt"] = name
+
+		if len(nameFilter) > 0 {
+			mongoFilter = append(mongoFilter, bson.E{Key: "created_at", Value: nameFilter})
+		}
+
+		mongoOpts.SetSort(bson.M{"created_at": -1})
+	}
+
 	mongoFilter = append(mongoFilter, bson.E{Key: "deleted_time", Value: bson.M{"$exists": false}})
 
 	cur, err := r.db.Collection(collectionArticle).Find(ctx, mongoFilter, mongoOpts)
