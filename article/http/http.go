@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
+	"github.com/situmorangbastian/eclipse"
 	"github.com/situmorangbastian/gower"
 
 	"github.com/situmorangbastian/ambarita/models"
@@ -15,31 +16,31 @@ type handler struct {
 }
 
 // NewHandler will initialize the articles/ resources endpoint
-func NewHandler(f *fiber.App, usecase models.ArticleUsecase) {
+func NewHandler(e *echo.Echo, usecase models.ArticleUsecase) {
 	handler := &handler{
 		usecase: usecase,
 	}
 
-	f.Get("/articles", handler.fetch)
-	f.Post("/articles", handler.store)
-	f.Put("/articles/:id", handler.update)
-	f.Get("/articles/:id", handler.get)
-	f.Delete("/articles/:id", handler.delete)
+	e.GET("/articles", handler.fetch)
+	e.POST("/articles", handler.store)
+	e.PUT("/articles/:id", handler.update)
+	e.GET("/articles/:id", handler.get)
+	e.DELETE("/articles/:id", handler.delete)
 }
 
-func (h handler) fetch(c *fiber.Ctx) error {
+func (h handler) fetch(c echo.Context) error {
 	num := 0
-	numStr := c.Query("num")
+	numStr := c.QueryParam("num")
 
 	if numStr != "" {
 		var err error
-		num, err = strconv.Atoi(c.Query("num"))
+		num, err = strconv.Atoi(c.QueryParam("num"))
 		if err != nil {
 			return gower.ConstraintErrorf("invalid query param num")
 		}
 	}
 
-	articles, nextCursor, err := h.usecase.Fetch(c.Context(), c.Query("cursor"), num)
+	articles, nextCursor, err := h.usecase.Fetch(c.Request().Context(), c.QueryParam("cursor"), num)
 	if err != nil {
 		return err
 	}
@@ -50,11 +51,11 @@ func (h handler) fetch(c *fiber.Ctx) error {
 		"next_cursor": nextCursor,
 	}
 
-	return c.Status(http.StatusOK).JSON(response)
+	return c.JSON(http.StatusOK, response)
 }
 
-func (h handler) get(c *fiber.Ctx) error {
-	article, err := h.usecase.Get(c.Context(), c.Params("id"))
+func (h handler) get(c echo.Context) error {
+	article, err := h.usecase.Get(c.Request().Context(), c.Param("id"))
 	if err != nil {
 		return err
 	}
@@ -62,21 +63,21 @@ func (h handler) get(c *fiber.Ctx) error {
 	response := models.DefaultSuccessResponse()
 	response.Data = article
 
-	return c.Status(http.StatusOK).JSON(response)
+	return c.JSON(http.StatusOK, response)
 }
 
-func (h handler) store(c *fiber.Ctx) error {
+func (h handler) store(c echo.Context) error {
 	article := models.Article{}
-	err := c.BodyParser(&article)
+	err := c.Bind(article)
 	if err != nil {
-		return gower.ConstraintErrorf(err.Error())
+		return eclipse.ConstraintErrorf("invalid request body")
 	}
 
 	if err := article.Validate(); err != nil {
 		return err
 	}
 
-	storedArticle, err := h.usecase.Store(c.Context(), article)
+	storedArticle, err := h.usecase.Store(c.Request().Context(), article)
 	if err != nil {
 		return err
 	}
@@ -84,23 +85,23 @@ func (h handler) store(c *fiber.Ctx) error {
 	response := models.DefaultCreatedResponse()
 	response.Data = storedArticle
 
-	return c.Status(http.StatusCreated).JSON(response)
+	return c.JSON(http.StatusCreated, response)
 }
 
-func (h handler) update(c *fiber.Ctx) error {
+func (h handler) update(c echo.Context) error {
 	article := models.Article{}
-	err := c.BodyParser(&article)
+	err := c.Bind(article)
 	if err != nil {
-		return gower.ConstraintErrorf(err.Error())
+		return eclipse.ConstraintErrorf("invalid request body")
 	}
 
-	article.ID = c.Params("id")
+	article.ID = c.Param("id")
 
 	if err := article.Validate(); err != nil {
 		return err
 	}
 
-	updatedArticle, err := h.usecase.Update(c.Context(), article)
+	updatedArticle, err := h.usecase.Update(c.Request().Context(), article)
 	if err != nil {
 		return err
 	}
@@ -108,14 +109,14 @@ func (h handler) update(c *fiber.Ctx) error {
 	response := models.DefaultSuccessResponse()
 	response.Data = updatedArticle
 
-	return c.Status(http.StatusOK).JSON(updatedArticle)
+	return c.JSON(http.StatusOK, updatedArticle)
 }
 
-func (h handler) delete(c *fiber.Ctx) error {
-	err := h.usecase.Delete(c.Context(), c.Params("id"))
+func (h handler) delete(c echo.Context) error {
+	err := h.usecase.Delete(c.Request().Context(), c.Param("id"))
 	if err != nil {
 		return err
 	}
 
-	return c.SendStatus(http.StatusNoContent)
+	return c.NoContent(http.StatusNoContent)
 }
