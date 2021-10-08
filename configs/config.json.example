@@ -1,19 +1,25 @@
 {
-    "debug": true,
-    "server": {
-      "address": ":2004"
-    },
-    "gofiber": {
-      "prefork": false
-    },
-    "context":{
-      "timeout": 5
-    },
-    "database": {
-        "host": "mysql",
-        "port": "3306",
-        "user": "root",
-        "pass": "pass",
-        "name": "ambarita"
-    }  
+  "debug": true,
+  "server": {
+    "address": ":2004"
+  },
+  "gofiber": {
+    "prefork": false
+  },
+  "context":{
+    "timeout": 5
+  },
+  "database": "mongo", // mongodb || mysql
+  "mysql": {
+    "host": "mysql",
+    "port": "3306",
+    "user": "root",
+    "pass": "pass",
+    "name": "ambarita",
+    "used": false
+  },
+  "mongo": {
+    "uri": "mongodb://localhost:27017",
+    "dbname": "ambarita"
+  } 
 }

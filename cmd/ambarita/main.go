@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -17,10 +19,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/situmorangbastian/gower"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
+	"github.com/situmorangbastian/ambarita/models"
 )
 
 func init() {
@@ -40,43 +45,70 @@ func init() {
 }
 
 func main() {
-	dbHost := viper.GetString(`database.host`)
-	dbPort := viper.GetString(`database.port`)
-	dbUser := viper.GetString(`database.user`)
-	dbPass := viper.GetString(`database.pass`)
-	dbName := viper.GetString(`database.name`)
-	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
-	val := url.Values{}
-	val.Add("parseTime", "1")
-	val.Add("loc", "Asia/Jakarta")
-	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
-	dbConn, err := sql.Open(`mysql`, dsn)
+	database := viper.GetString("database")
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = dbConn.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
+	var ar models.ArticleRepository
 
-	defer func() {
-		err := dbConn.Close()
+	switch database {
+	case "mysql":
+		dbHost := viper.GetString(`mysql.host`)
+		dbPort := viper.GetString(`mysql.port`)
+		dbUser := viper.GetString(`mysql.user`)
+		dbPass := viper.GetString(`mysql.pass`)
+		dbName := viper.GetString(`mysql.name`)
+		connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+		val := url.Values{}
+		val.Add("parseTime", "1")
+		val.Add("loc", "Asia/Jakarta")
+		dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
+		dbConn, err := sql.Open(`mysql`, dsn)
+
 		if err != nil {
 			log.Fatal(err)
 		}
-	}()
+		err = dbConn.Ping()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// Migration
-	driver, err := mysql.WithInstance(dbConn, &mysql.Config{})
-	if err != nil {
-		log.Fatal(err)
+		defer func() {
+			err := dbConn.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+
+		// Migration
+		driver, err := mysql.WithInstance(dbConn, &mysql.Config{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		m, err := migrate.NewWithDatabaseInstance("file://migrations/", "mysql", driver)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = m.Up()
+
+		ar = articleRepository.NewMysqlRepository(dbConn)
+	case "mongo":
+		mongoURI := viper.GetString("mongo.uri")
+
+		mongoClient, err := mongo.Connect(
+			context.Background(),
+			options.Client().ApplyURI(mongoURI).
+				SetConnectTimeout(2*time.Second).
+				SetServerSelectionTimeout(3*time.Second),
+		)
+		if err != nil {
+			log.Fatal("Mongo connection failed: ", err.Error())
+		}
+
+		mongoDBName := viper.GetString("mongo.dbname")
+
+		ar = articleRepository.NewMongoRepository(mongoClient.Database(mongoDBName))
+	default:
+		panic("please select your database: mysql or mongo")
 	}
-	m, err := migrate.NewWithDatabaseInstance("file://migrations/", "mysql", driver)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_ = m.Up()
 
 	// Server
 	app := fiber.New(fiber.Config{
@@ -96,7 +128,7 @@ func main() {
 	}()
 
 	// Domain
-	ar := articleRepository.NewMysqlRepository(dbConn)
+
 	au := articleUsecase.NewArticleUsecase(ar)
 	articleHandler.NewHandler(app, au)
 
