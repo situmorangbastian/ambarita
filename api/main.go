@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/situmorangbastian/ambarita/api/vercelhttp"
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
@@ -34,7 +33,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	mongoDBName := os.Getenv("MONGO_DB_NAME")
 
 	ar := articleRepository.NewMongoRepository(mongoClient.Database(mongoDBName))
-	vercelhttp.ArticleUsecase = articleUsecase.NewArticleUsecase(ar)
 
 	e := echo.New()
 	e.Use(eclipse.Error())

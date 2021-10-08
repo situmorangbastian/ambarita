@@ -28,17 +28,17 @@ func NewHandler(e *echo.Echo, usecase models.ArticleUsecase) {
 	e.DELETE("/articles/:id", handler.delete)
 }
 
-// NewHandler will initialize the articles/ resources endpoint
+// NewHandler will initialize the group resources endpoint for vercel serverless
 func NewGroupHandler(e *echo.Group, usecase models.ArticleUsecase) {
 	handler := &handler{
 		usecase: usecase,
 	}
 
-	e.GET("/articles", handler.fetch)
-	e.POST("/articles", handler.store)
-	e.PUT("/articles/:id", handler.update)
-	e.GET("/articles/:id", handler.get)
-	e.DELETE("/articles/:id", handler.delete)
+	e.GET("/posts", handler.fetch)
+	e.POST("/posts", handler.store)
+	e.PUT("/posts/:id", handler.update)
+	e.GET("/posts/:id", handler.get)
+	e.DELETE("/posts/:id", handler.delete)
 }
 
 func (h handler) fetch(c echo.Context) error {
