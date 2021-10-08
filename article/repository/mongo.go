@@ -39,6 +39,7 @@ func (r mongoRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 			"created_time": true,
 			"updated_time": true,
 		})
+	mongoOpts.SetSort(bson.M{"created_time": -1})
 
 	mongoFilter := bson.D{}
 
@@ -48,13 +49,11 @@ func (r mongoRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 		if err != nil {
 			return []models.Article{}, "", err
 		}
-		nameFilter["$gt"] = name
+		nameFilter["$lt"] = name
 
 		if len(nameFilter) > 0 {
-			mongoFilter = append(mongoFilter, bson.E{Key: "created_at", Value: nameFilter})
+			mongoFilter = append(mongoFilter, bson.E{Key: "created_time", Value: nameFilter})
 		}
-
-		mongoOpts.SetSort(bson.M{"created_at": -1})
 	}
 
 	mongoFilter = append(mongoFilter, bson.E{Key: "deleted_time", Value: bson.M{"$exists": false}})
