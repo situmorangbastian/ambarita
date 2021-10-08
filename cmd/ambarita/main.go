@@ -10,14 +10,11 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/monitor"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
-	"github.com/situmorangbastian/gower"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,6 +23,7 @@ import (
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
 	"github.com/situmorangbastian/ambarita/models"
+	"github.com/situmorangbastian/eclipse"
 )
 
 func init() {
@@ -110,33 +108,28 @@ func main() {
 		panic("please select your database: mysql or mongo")
 	}
 
-	// Server
-	app := fiber.New(fiber.Config{
-		Prefork:      viper.GetBool("gofiber.prefork"),
-		ErrorHandler: gower.ErrMiddleware,
-	})
-	app.Use(recover.New())
+	e := echo.New()
+	e.Use(eclipse.Error())
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	// Domain
+	au := articleUsecase.NewArticleUsecase(ar)
+	articleHandler.NewHandler(e, au)
+
+	// Start server
 	go func() {
-		<-c
-		log.Info("Gracefully shutting down...")
-		if err := app.Shutdown(); err != nil {
-			log.Fatal(err)
+		if err := e.Start(viper.GetString("server.address")); err != nil {
+			e.Logger.Info("shutting down the server")
 		}
 	}()
 
-	// Domain
-
-	au := articleUsecase.NewArticleUsecase(ar)
-	articleHandler.NewHandler(app, au)
-
-	// monitor dashboard
-	app.Get("/dashboard", monitor.New())
-
-	// Start server
-	if err := app.Listen(viper.GetString("server.address")); err != nil {
-		log.Fatal(err)
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 10 seconds.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
 	}
 }

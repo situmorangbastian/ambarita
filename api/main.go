@@ -7,13 +7,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/situmorangbastian/ambarita/api/vercelhttp"
+	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
+	"github.com/situmorangbastian/eclipse"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -32,12 +33,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	mongoDBName := os.Getenv("MONGO_DB_NAME")
 
 	ar := articleRepository.NewMongoRepository(mongoClient.Database(mongoDBName))
-	vercelhttp.ArticleUsecase = articleUsecase.NewArticleUsecase(ar)
 
-	router := mux.NewRouter()
+	e := echo.New()
+	e.Use(eclipse.Error())
+	g := e.Group("/api")
 
-	router.HandleFunc("/api/posts", vercelhttp.FetchAllArticles).Methods(http.MethodGet)
-	router.HandleFunc("/api/posts/{id}", vercelhttp.GetByID).Methods(http.MethodGet)
+	// Domain
+	au := articleUsecase.NewArticleUsecase(ar)
+	articleHandler.NewGroupHandler(g, au)
 
-	router.ServeHTTP(w, r)
+	e.ServeHTTP(w, r)
 }
