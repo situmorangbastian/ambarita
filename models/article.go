@@ -9,13 +9,12 @@ import (
 
 // Article ...
 type Article struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title" validate:"required"`
-	Slug        string    `json:"slug"`
-	Content     string    `json:"content" validate:"required"`
-	CreateTime  time.Time `json:"created_time"`
-	UpdateTime  time.Time `json:"updated_time"`
-	DeletedTime time.Time `json:"-"`
+	ID         string    `json:"id" bson:"_id"`
+	Title      string    `json:"title" bson:"title" validate:"required"`
+	Slug       string    `json:"slug" bson:"slug"`
+	Content    string    `json:"content" bson:"content" validate:"required"`
+	CreateTime time.Time `json:"created_time" bson:"created_time"`
+	UpdateTime time.Time `json:"updated_time" bson:"updated_time"`
 }
 
 func (a Article) Validate() error {
