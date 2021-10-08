@@ -33,14 +33,9 @@ func (r mongoRepository) Fetch(ctx context.Context, cursor string, num int) ([]m
 		SetLimit(int64(num)).
 		SetProjection(bson.M{
 			"_id":          true,
-			"type":         true,
-			"name":         true,
 			"slug":         true,
-			"url":          true,
-			"description":  true,
-			"image":        true,
-			"active":       true,
-			"options":      true,
+			"title":        true,
+			"content":      true,
 			"created_time": true,
 			"updated_time": true,
 		})
