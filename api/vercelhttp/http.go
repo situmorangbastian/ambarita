@@ -1,6 +1,7 @@
 package vercelhttp
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -8,11 +9,17 @@ import (
 	"github.com/situmorangbastian/ambarita/models"
 )
 
+var (
+	ArticleUsecase models.ArticleUsecase
+)
+
 func FetchAllArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	resp, _ := json.Marshal(models.Posts)
+	data, _, _ := ArticleUsecase.Fetch(context.Background(), "", 20)
+
+	resp, _ := json.Marshal(data)
 
 	_, _ = w.Write(resp)
 }
@@ -21,13 +28,9 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	var resp []byte
+	data, _ := ArticleUsecase.Get(context.Background(), id)
 
-	for _, post := range models.Posts {
-		if post.ID == id {
-			resp, _ = json.Marshal(post)
-		}
-	}
+	resp, _ := json.Marshal(data)
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
