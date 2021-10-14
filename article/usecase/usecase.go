@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/situmorangbastian/ambarita/models"
-	"github.com/situmorangbastian/gower"
+	"github.com/situmorangbastian/eclipse"
 )
 
 type usecase struct {
@@ -97,7 +97,7 @@ func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 	_, err := u.repository.Get(ctx, slug)
 	if err != nil {
 		switch errors.Cause(err).(type) {
-		case gower.NotFoundError:
+		case eclipse.NotFoundError:
 			return slug, nil
 		default:
 			return "", err
@@ -110,7 +110,7 @@ func (u usecase) resolveSlug(ctx context.Context, slug string) (string, error) {
 		_, err = u.repository.Get(ctx, newSlug)
 		if err != nil {
 			switch errors.Cause(err).(type) {
-			case gower.NotFoundError:
+			case eclipse.NotFoundError:
 				return newSlug, nil
 			default:
 				return "", err

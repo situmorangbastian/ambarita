@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/situmorangbastian/ambarita/models"
-	"github.com/situmorangbastian/gower"
+	"github.com/situmorangbastian/eclipse"
 )
 
 const (
@@ -109,7 +109,7 @@ func (r mongoRepository) Get(ctx context.Context, ID string) (models.Article, er
 	)
 	if res.Err() != nil {
 		if res.Err() == mongo.ErrNoDocuments {
-			return models.Article{}, gower.NotFoundErrorf("article not found")
+			return models.Article{}, eclipse.NotFoundErrorf("article not found")
 		}
 		return models.Article{}, res.Err()
 	}
