@@ -6,7 +6,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/situmorangbastian/eclipse"
-	"github.com/situmorangbastian/gower"
 
 	"github.com/situmorangbastian/ambarita/models"
 )
@@ -49,7 +48,7 @@ func (h handler) fetch(c echo.Context) error {
 		var err error
 		num, err = strconv.Atoi(c.QueryParam("num"))
 		if err != nil {
-			return gower.ConstraintErrorf("invalid query param num")
+			return eclipse.ConstraintErrorf("invalid query param num")
 		}
 	}
 
