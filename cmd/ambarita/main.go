@@ -22,6 +22,7 @@ import (
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
+	"github.com/situmorangbastian/ambarita/cmd/logger"
 	"github.com/situmorangbastian/ambarita/models"
 	"github.com/situmorangbastian/eclipse"
 )
@@ -33,13 +34,7 @@ func init() {
 		panic(err)
 	}
 
-	if viper.GetBool("debug") {
-		log.SetLevel(log.DebugLevel)
-		log.Warn("service is running in DEBUG Mode")
-		return
-	}
-	log.SetLevel(log.InfoLevel)
-	log.Info("service is running in PRODUCTION Mode")
+	logger.SetupLogs()
 }
 
 func main() {

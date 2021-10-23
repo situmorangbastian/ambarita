@@ -1,5 +1,5 @@
 {
-  "debug": true,
+  log_level": "debug", // for production set empty
   "server": {
     "address": ":2004"
   },

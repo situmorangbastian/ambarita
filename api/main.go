@@ -14,10 +14,13 @@ import (
 	articleHandler "github.com/situmorangbastian/ambarita/article/http"
 	articleRepository "github.com/situmorangbastian/ambarita/article/repository"
 	articleUsecase "github.com/situmorangbastian/ambarita/article/usecase"
+	"github.com/situmorangbastian/ambarita/cmd/logger"
 	"github.com/situmorangbastian/eclipse"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	logger.SetupLogs()
+
 	mongoURI := os.Getenv("MONGO_URI")
 
 	mongoClient, err := mongo.Connect(
